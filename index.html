@@ -4538,6 +4538,11 @@
     	    var defaultTee = document.getElementById('newRoundDefaultTee').value;
     	    var roundType = document.getElementById('newRoundType').value;
     
+			// === LIGNES DE DEBUG À AJOUTER ===
+			console.log('=== DEBUG DATE ===');
+			console.log('Date récupérée du formulaire:', date);
+			console.log('Type de la variable date:', typeof date);
+
     	    // Validation de base
     	    if (!date || !courseName || !defaultTee) {
         	alert('Veuillez remplir tous les champs obligatoires (date, terrain, départ par défaut).');
@@ -4582,9 +4587,17 @@
 			var month = parseInt(dateParts[1]);
 			var day = parseInt(dateParts[2]);
 
+			// === AJOUTER CES LIGNES DE DEBUG ===
+			console.log('Parties de date:', dateParts);
+			console.log('Année:', year, 'Mois:', month, 'Jour:', day);
+
 			// Pour l'affichage et le stockage, garder la date string originale
 			var gameDate = new Date(year, month - 1, day);
     
+			// === AJOUTER CETTE LIGNE DE DEBUG ===
+			console.log('Date finale créée:', gameDate);
+			console.log('Date qui sera stockée dans dates[]:', date);
+
     	    // Récupérer les métadonnées GPR
 			var gprPhase = '';
 			var finaleFormat = '';
