@@ -6813,62 +6813,61 @@
     	}
 
     	// Sauvegarder dans Firebase
-    	Promise.all([
-        	saveRoundsToFirebase(),
-        	saveScoresToFirebase(),
-        	saveDatesToFirebase()
-    	]).then(function() {
-        	console.log('Nouvelle partie sauvegardée dans Firebase');
-    	}).catch(function(error) {
-    	    console.error('Erreur de sauvegarde partie:', error);
-        	alert('Erreur de sauvegarde: ' + error.message);
-    	});
+        Promise.all([
+            saveScoresToFirebase(),
+            saveDatesToFirebase(),
+            saveRoundsToFirebase()  // ← AJOUT DE CETTE LIGNE MANQUANTE
+        ]).then(function() {
+            console.log('Nouvelle partie sauvegardée dans Firebase');
+    
+            // Confirmation et nettoyage
+            // 🔥 NOTIFICATION: Partie terminée
+            var roundScores = scores.filter(s => s.roundId === newRoundId);
+            if (roundScores.length > 0) {
+                var roundRanking = [...roundScores].sort((a, b) => a.net - b.net);
+    
+                var emailsSent = 0;
+                for (var i = 0; i < roundScores.length; i++) {
+                    var playerScore = roundScores[i];
+                    var player = players.find(p => p.id === playerScore.playerId);
+        
+                    if (player && player.email) {
+                        var playerPosition = roundRanking.findIndex(r => r.playerId === playerScore.playerId) + 1;
+            
+                        var notificationData = {
+                            round: newRound,
+                            playerScore: playerScore,
+                            playerPosition: playerPosition,
+                            roundRanking: roundRanking
+                        };
+            
+                        sendEmailNotification('results', [player], notificationData);
+                        emailsSent++;
+                    }
+                }
+    
+                if (emailsSent > 0) {
+                    alert('✅ Partie enregistrée avec succès !\n📧 ' + emailsSent + ' notification(s) résultats envoyée(s).');
+                } else {
+                    alert('✅ Partie enregistrée avec succès !\nAucun email configuré pour les joueurs.');
+                }
+            } else {
+                alert('✅ Partie enregistrée avec succès !');
+            }
 
-    	// Confirmation et nettoyage
-    	// 🔥 NOTIFICATION: Partie terminée
-    	var roundScores = scores.filter(s => s.roundId === newRoundId);
-    	if (roundScores.length > 0) {
-    	    var roundRanking = [...roundScores].sort((a, b) => a.net - b.net);
-
-        	var emailsSent = 0;
-        	for (var i = 0; i < roundScores.length; i++) {
-            	var playerScore = roundScores[i];
-            	// 🔧 SEULE LIGNE MODIFIÉE - recherche plus robuste
-            	var player = players.find(p => p.id === playerScore.playerId || p.id === parseInt(playerScore.playerId));
-
-            	if (player && player.email) {
-            	    var playerPosition = roundRanking.findIndex(r => r.playerId === playerScore.playerId) + 1;
-                
-                	var notificationData = {
-                    	round: newRound,
-                    	playerScore: playerScore,
-                    	playerPosition: playerPosition,
-                    	roundRanking: roundRanking
-                	};
-                
-                	sendEmailNotification('results', [player], notificationData);
-                	emailsSent++;
-            	}
-        	}
-
-        	if (emailsSent > 0) {
-            	alert('✅ Partie enregistrée avec succès !\n📧 ' + emailsSent + ' notification(s) résultats envoyée(s).');
-        	} else {
-            	alert('✅ Partie enregistrée avec succès !\nAucun email configuré pour les joueurs.');
-        	}
-    	} else {
-        	alert('✅ Partie enregistrée avec succès !');
-    	}
-
-    	resetNewRoundForm();
-
-    	// Optionnel : aller voir la partie dans les détails
-    	if (confirm('Voulez-vous voir cette partie dans les détails ?')) {
-        	showDetails();
-        	document.getElementById('roundSelect').value = newRoundId;
-        	showRoundDetail();
-    	}
-	}
+            resetNewRoundForm();
+    
+            // Optionnel : aller voir la partie dans les détails
+            if (confirm('Voulez-vous voir cette partie dans les détails ?')) {
+                showDetails();
+                document.getElementById('roundSelect').value = newRoundId;
+                showRoundDetail();
+            }
+    
+        }).catch(function(error) {
+            console.error('Erreur de sauvegarde partie:', error);
+            alert('Erreur de sauvegarde: ' + error.message);
+        });
 
 	// Réinitialiser le formulaire
 	function resetNewRoundForm() {
@@ -9090,5 +9089,5 @@
 	
 </script>
 </body>
-
 </html>
+
